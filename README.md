@@ -12,6 +12,7 @@
 - Create a virtual environment `python3 -m venv otehrvenv` will create a virtual env
 - Source the env, assuming you on zsh/bash `source venv/bin/activate`
 - Install dependencies `pip3 install -r requirements.txt`
+- To run project locally, run `python3 app.py` in the app directory of this project
 
 ## Deployment & Build Server
 - You have already done this on the Git & Github Quiz assignment
