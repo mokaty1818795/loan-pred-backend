@@ -32,6 +32,8 @@ jobs:
           FLASK_CONFIG: testing
       - image: circleci/postgres:9.6.5-alpine-ram
     steps:
+      - restore_cache:
+          key: deps2-{{ checksum "requirements.txt" }}
       - run:
           command: |
             python3 -m venv venv
