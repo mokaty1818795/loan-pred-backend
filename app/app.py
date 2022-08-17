@@ -1,8 +1,11 @@
 import pickle
+import pandas as pd
 import numpy as np
 from flask import Flask, render_template, json, jsonify, request
 import flask
-import os
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.model_selection import train_test_split
+
 model = pickle.load(open('model.pkl', 'rb'))
 app = Flask(__name__)
 
@@ -21,32 +24,64 @@ def getData():
 
 @app.route('/predictloan', methods=['POST'])
 def predictLoan():
-    print("methos s")
-    data = request.get_json()
-    print("method call")
-    # formInputData(data)
-    print("Data Below")
-    print(data)
-    data1 = [float(x) for x in data.values()]
-    print("Data1 Loop")
-    print(data1)
-    # Predict
-    print("Prediction Starts")
-    prediction = model.predict(data1)
-    prediction = int(prediction.round())
-    print("predicted")
-    if (prediction == 1):
-        prediction = "Yes"
-    else:
-        prediction = "No"
-        prediction = {'prediction': prediction}
+    print("methoss")
+    json_data1 = request.get_json()
 
-    return jsonify(prediction)
+   # return data
+   # train_data=pd.DataFrame(data)
+
+   ## data1 = [float(x) for x in data.values()]
+   ## print("Data1 Loop")
+    # print(data1)
+    # Predict
+
+    ##sc_X = StandardScaler()
+    ##X_scaled = pd.DataFrame(sc_X.fit_transform(json_data1), columns=json_data1.columns)
+    # print(X_scaled)
+    # print(data)
+
+    json_data1['Self_Employed'].replace({'Yes': 1, 'No': 0}, inplace=True)
+    json_data1['Married'].replace({'Yes': 1, 'No': 0}, inplace=True)
+    json_data1['Gender'].replace({'Male': 1, 'Female': 0}, inplace=True)
+    json_data1['Education'].replace({'Graduate': 1, 'Not Graduate': 0}, inplace=True)
+    json_data1['Property_Area'].replace({'Urban': 2, 'Semiurban': 1, 'Rural': 0}, inplace=True)
+    json_data1['Loan_Status'].replace({'Y': 1, 'N': 0}, inplace=True)
+
+    y = json_data1['Loan_Status']  # target
+    X = json_data1.drop('Loan_Status', axis=1) 
+    
+  
+
+
+    sc_X = StandardScaler()
+    X_scaled = pd.DataFrame(sc_X.fit_transform(X), columns=X.columns)
+   
+
+
+    X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=0)  
+    # prediators
+
+    new_model = model.fit(X_train, y_train)
+    ypred = new_model.predict(X_test)
+
+    ##prediction = model.predict(np.array(json_data1))
+
+    ##prediction_round = int(prediction.round())
+
+    # print("predicted")
+    # if (prediction == 1):
+    #     prediction = "Yes"
+    # else:
+    #     prediction = "No"
+    #     prediction = {'prediction': prediction}
+
+    return jsonify(ypred)
 
 
 def formInputData(input):
 
-    input.pop("Loan_ID")
+    # input.pop("Loan_ID")
     # Format the gender
     if (input["Gender"] == 'Female'):
         input["Gender"] = 0
